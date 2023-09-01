@@ -32,11 +32,27 @@ using tcp = net::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
 #include <boost/regex.hpp>
 
+#include <boost/filesystem.hpp>
+
 //#include <cstdlib>
 #include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <string>
+#include <stdlib.h>
+
+//______________________________________________________________________________________
+std::string expand( std::string path ) {
+  const char* home = getenv ("HOME");
+  if ( home ) {
+    boost::replace_first( path, "~",       std::string(home) );
+    boost::replace_first( path, "$HOME",   std::string(home) );
+    boost::replace_first( path, "${HOME}", std::string(home) );
+  } else {
+    std::cout << "Warning:  $HOME does not seem to be defined" << std::endl;
+  }
+  return path;
+}
 
 //______________________________________________________________________________________
 
@@ -79,7 +95,7 @@ http::response<http::string_body> GET( std::string target, std::vector<std::pair
 
 //______________________________________________________________________________________
 Sancho::Sancho() : 
-  rucio_config( ".rucio/etc/rucio.cfg" ),
+  rucio_config( expand("~/.rucio/etc/rucio.cfg") ),
   rucio_host(),
   rucio_auth_host(),
   rucio_auth_type(),
@@ -96,7 +112,8 @@ Sancho::Sancho() :
   init();
 }
 //______________________________________________________________________________________
-Sancho::Sancho( const char* config, std::vector<std::pair<std::string,std::string>> replacements_ ) : rucio_config( config ),
+Sancho::Sancho( const char* config, std::vector<std::pair<std::string,std::string>> replacements_ ) : 
+  rucio_config( expand(config) ),
   rucio_host(),
   rucio_auth_host(),
   rucio_auth_type(),

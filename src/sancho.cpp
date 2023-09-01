@@ -2,7 +2,7 @@
 #include <iostream>
 int main() {
 
-  Sancho san( ".rucio/etc/rucio.cfg", 
+  Sancho san( "~/.rucio/etc/rucio.cfg", 
 	      { 
 		{"localhost",""},
                 {"file",""},
