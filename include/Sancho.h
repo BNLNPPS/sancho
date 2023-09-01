@@ -3,12 +3,13 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 
 class Sancho {
   
 public:
   Sancho();
-  Sancho( const char* config );
+  Sancho( const char* config, std::vector<std::pair<std::string,std::string>> replacements={} );
  ~Sancho(){ /* nada */ }
 
   /// Given a logical filename, return a vector of all physical file locations on the
@@ -37,8 +38,9 @@ private:
   std::string rucio_version;
 
   int http_version;
-
   int verbose;
+
+  std::vector<std::pair<std::string,std::string>> replacements;
 
   
 };

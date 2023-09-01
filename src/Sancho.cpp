@@ -30,6 +30,7 @@ using tcp = net::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
+#include <boost/regex.hpp>
 
 //#include <cstdlib>
 #include <iostream>
@@ -89,12 +90,13 @@ Sancho::Sancho() :
   rucio_token_expiration(),
   rucio_version(),
   http_version(11),
-  verbose(1)
+  verbose(1),
+  replacements()
 { 
   init();
 }
 //______________________________________________________________________________________
-Sancho::Sancho( const char* config ) : rucio_config( config ),
+Sancho::Sancho( const char* config, std::vector<std::pair<std::string,std::string>> replacements_ ) : rucio_config( config ),
   rucio_host(),
   rucio_auth_host(),
   rucio_auth_type(),
@@ -105,7 +107,8 @@ Sancho::Sancho( const char* config ) : rucio_config( config ),
   rucio_token_expiration(),
   rucio_version(),
   http_version(11),
-  verbose(1)
+  verbose(1),
+  replacements( replacements_ )
 {
   init();
 }
@@ -241,9 +244,20 @@ std::vector<std::string> Sancho::lfn2pfns( const std::string lfn, const std::str
   boost::property_tree::ptree pt;
   boost::property_tree::read_json(body, pt);  
 
-    for (boost::property_tree::ptree::iterator pos = pt.begin(); pos != pt.end(); ++pos ) {
-      result.push_back( (pos->second).data() );
+  for (boost::property_tree::ptree::iterator pos = pt.begin(); pos != pt.end(); ++pos ) {
+
+    std::string pfn = (pos->second).data();
+    std::string replaced;
+
+    // Apply regular expressions in order that they were declared in ctor
+    for ( auto rep : replacements ) {
+      boost::regex re(rep.first); // regular expression will be replaced with...
+      replaced = boost::regex_replace(pfn, re, rep.second);
+      pfn      = replaced; // update the pfn
     }
+
+    result.push_back( pfn );
+  }
   
   return result;
 
